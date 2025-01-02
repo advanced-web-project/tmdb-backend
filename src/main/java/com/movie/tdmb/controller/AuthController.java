@@ -24,6 +24,7 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<User> register(@RequestBody SignUpDto signUpDto) {
         User registeredUser = authService.registerUser(signUpDto);
+        authService.sendOTP(signUpDto.getEmail());
         return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
     }
     /**
