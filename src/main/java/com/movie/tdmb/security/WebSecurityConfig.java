@@ -3,6 +3,10 @@ import com.movie.tdmb.security.jwt.AuthEntryPointJwt;
 import com.movie.tdmb.security.jwt.AuthTokenFilter;
 import com.movie.tdmb.security.jwt.JwtUtils;
 import com.movie.tdmb.security.service.UserDetailsServiceImpl;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -76,7 +80,7 @@ public class WebSecurityConfig {
                 // Set session policy to stateless
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Allow public access to test endpoints
                         .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
@@ -94,4 +98,15 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes("bearer-key",
+                                new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
+                        ))
+                .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
+    }
+
 }
