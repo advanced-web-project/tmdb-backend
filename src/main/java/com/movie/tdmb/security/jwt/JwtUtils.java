@@ -1,5 +1,4 @@
 package com.movie.tdmb.security.jwt;
-
 import com.movie.tdmb.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
 
@@ -36,6 +34,7 @@ public class JwtUtils {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .claim("passwordChangedAt", userPrincipal.getPasswordChangedAt())
+                .claim("userID", userPrincipal.getId())
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -58,6 +57,10 @@ public class JwtUtils {
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build()
                 .parseClaimsJws(token).getBody().getSubject();
+    }
+    public String getIdFromJwtToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(key()).build()
+                .parseClaimsJws(token).getBody().get("userID", String.class);
     }
     public Date getPasswordChangedAtFromJwtToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key()).build()

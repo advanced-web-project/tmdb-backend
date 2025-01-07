@@ -99,4 +99,12 @@ public class AuthService {
                 .orElseThrow(() -> new UserNotFoundException("User not found with refresh token"));
         return jwtUtils.generateTokenFromUsername(user.getUsername());
     }
+    public RefreshToken getRefreshTokenFromEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
+        RefreshToken refreshToken = refreshTokenRepository.findByUserId(user.getId())
+                .filter(token -> token.getExpiryDate().isAfter(Instant.now()))
+                .orElseGet(() -> generateRefreshToken(user));
+        return refreshToken;
+    }
+
 }

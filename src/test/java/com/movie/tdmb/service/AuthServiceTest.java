@@ -32,13 +32,13 @@ public class AuthServiceTest {
         signUpDto.setEmail("testuser@example.com");
         signUpDto.setPassword("password");
         User user = new User();
-        user.setUserName("testuser");
+        user.setUsername("testuser");
         user.setEmail("testuser@example.com");
         user.setPassword("password");
         when(userRepository.save(any(User.class))).thenReturn(user);
         User registeredUser = authService.registerUser(signUpDto);
         // Assert
-        assertEquals("testuser", registeredUser.getUserName());
+        assertEquals("testuser", registeredUser.getUsername());
         assertEquals("testuser@example.com", registeredUser.getEmail());
 
     }

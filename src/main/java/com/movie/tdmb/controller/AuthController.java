@@ -2,13 +2,13 @@ package com.movie.tdmb.controller;
 import com.movie.tdmb.dto.SignInDto;
 import com.movie.tdmb.dto.SignUpDto;
 import com.movie.tdmb.dto.VerifyOtpDto;
+import com.movie.tdmb.model.RefreshToken;
 import com.movie.tdmb.model.User;
 import com.movie.tdmb.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
 
 @RestController
@@ -72,5 +72,14 @@ public class AuthController {
         String refreshToken = request.get("refreshToken");
         String newAccessToken = authService.getNewAccessToken(refreshToken);
         return new ResponseEntity<>(newAccessToken, HttpStatus.OK);
+    }
+    @PostMapping("/verify-password")
+    public ResponseEntity<?> verifyOtpChangePassword(@RequestBody VerifyOtpDto request) throws Exception {
+        boolean isValidOtp = authService.verifyOTP(request.getOtp(),request.getEmail());
+        if (!isValidOtp) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP is wrong");
+        }
+        RefreshToken refreshToken = authService.getRefreshTokenFromEmail(request.getEmail());
+        return ResponseEntity.ok(refreshToken);
     }
 }
