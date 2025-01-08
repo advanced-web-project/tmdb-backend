@@ -23,9 +23,9 @@ public class WatchListController {
     private JwtUtils jwtUtils;
 
     @PostMapping
-    public ResponseEntity<ResponseWatchListDTO> addWatchlist(@RequestBody RequestWatchListDTO request, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<WatchList> addWatchlist(@RequestBody RequestWatchListDTO request, @RequestHeader("Authorization") String token) {
         String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
-        ResponseWatchListDTO response = watchListService.addWatchlist(request, userId);
+        WatchList response = watchListService.addWatchlist(request, userId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -36,9 +36,10 @@ public class WatchListController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeWatchlist(@PathVariable String id) {
-        watchListService.removeWatchlist(id);
+    @DeleteMapping("/{movieId}")
+    public ResponseEntity<Void> removeWatchlist(@PathVariable String movieId, @RequestHeader("Authorization") String token) {
+        String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
+        watchListService.removeWatchlist(movieId, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
