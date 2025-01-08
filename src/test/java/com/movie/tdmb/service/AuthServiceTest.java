@@ -31,7 +31,7 @@ public class AuthServiceTest {
         signUpDto.setUsername("testuser");
         signUpDto.setEmail("testuser@example.com");
         signUpDto.setPassword("password");
-        User user = new User();
+        User user = User.builder().build();
         user.setUsername("testuser");
         user.setEmail("testuser@example.com");
         user.setPassword("password");
