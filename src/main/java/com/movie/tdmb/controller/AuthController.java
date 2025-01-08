@@ -73,6 +73,12 @@ public class AuthController {
         String newAccessToken = authService.getNewAccessToken(refreshToken);
         return new ResponseEntity<>(newAccessToken, HttpStatus.OK);
     }
+    /**
+     * Verifies an OTP and changes the password.
+     *
+     * @param request the VerifyOtpDto containing the OTP and email
+     * @return a ResponseEntity containing the result of the verification
+     */
     @PostMapping("/verify-password")
     public ResponseEntity<?> verifyOtpChangePassword(@RequestBody VerifyOtpDto request) throws Exception {
         boolean isValidOtp = authService.verifyOTP(request.getOtp(),request.getEmail());
@@ -81,5 +87,20 @@ public class AuthController {
         }
         RefreshToken refreshToken = authService.getRefreshTokenFromEmail(request.getEmail());
         return ResponseEntity.ok(refreshToken);
+    }
+    /**
+     * Handles POST requests for Google login authentication.
+     *
+     * @param code the authorization code from Google's OAuth 2.0 flow.
+     * @return a ResponseEntity containing the authentication result (e.g., user info or token).
+     * @throws Exception if authentication fails or communication with Google encounters an issue.
+     *
+     * This method exchanges the provided code for access and ID tokens via the
+     * `authenticationService`, validates the user's identity, and returns the result.
+     */
+    @PostMapping("/outbound/authentication")
+    ResponseEntity<?> outboundAuthenticate(@RequestParam("code") String code) throws Exception {
+        var result = authService.outboundAuthentication(code);
+        return ResponseEntity.ok().body(result);
     }
 }
