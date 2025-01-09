@@ -1,16 +1,16 @@
 package com.movie.tdmb.service;
 
-import com.movie.tdmb.dto.RequestWatchListDTO;
-import com.movie.tdmb.dto.ResponseWatchListDTO;
+import com.movie.tdmb.dto.RequestFavoriteListDTO;
+import com.movie.tdmb.dto.ResponseFavoriteListDTO;
 import com.movie.tdmb.exception.DuplicateWatchListException;
 import com.movie.tdmb.exception.MovieNotFoundException;
 import com.movie.tdmb.exception.UserNotFoundException;
 import com.movie.tdmb.exception.WatchListNotFoundException;
+import com.movie.tdmb.model.FavoriteList;
 import com.movie.tdmb.model.Movie;
-import com.movie.tdmb.model.WatchList;
+import com.movie.tdmb.repository.FavoriteListRepository;
 import com.movie.tdmb.repository.MovieRepository;
 import com.movie.tdmb.repository.UserRepository;
-import com.movie.tdmb.repository.WatchListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class WatchListService {
+public class FavoriteListService {
     @Autowired
-    private WatchListRepository watchListRepository;
+    private FavoriteListRepository favoriteListRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -29,36 +29,36 @@ public class WatchListService {
     @Autowired
     private MovieRepository movieRepository;
 
-    public WatchList addWatchlist(RequestWatchListDTO request, String userId) {
+    public FavoriteList addFavoriteList(RequestFavoriteListDTO request, String userId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
         movieRepository.findById(request.getMovieId()).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
-        boolean exists = watchListRepository.findByMovieIdAndUserId(request.getMovieId(), userId).isPresent();
+        boolean exists = favoriteListRepository.findByMovieIdAndUserId(request.getMovieId(), userId).isPresent();
         if (exists) {
             throw new DuplicateWatchListException(
-                    String.format("Movie with ID %s is already in the watchlist for user %s", request.getMovieId(), userId));
+                    String.format("Movie with ID %s is already in the favorite list for user %s", request.getMovieId(), userId));
         }
-        WatchList watchlist = WatchList.builder()
+        FavoriteList favoriteList = FavoriteList.builder()
                 .movieId(request.getMovieId())
                 .userId(userId)
                 .addedAt(LocalDateTime.now())
                 .build();
-        WatchList savedWatchlist = watchListRepository.save(watchlist);
-        return savedWatchlist;
+        FavoriteList savedFavoriteList = favoriteListRepository.save(favoriteList);
+        return savedFavoriteList;
     }
 
-    public List<ResponseWatchListDTO> getWatchlistByUser(String userId) {
+    public List<ResponseFavoriteListDTO> getFavoriteListByUser(String userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        List<WatchList> watchlists = watchListRepository.findByUserId(userId);
+        List<FavoriteList> favoriteLists = favoriteListRepository.findByUserId(userId);
 
-        return watchlists.stream()
-                .map(watchlist -> {
-                    Movie movie = movieRepository.findById(watchlist.getMovieId()).orElse(null);
+        return favoriteLists.stream()
+                .map(favoriteList -> {
+                    Movie movie = movieRepository.findById(favoriteList.getMovieId()).orElse(null);
 
-                    return ResponseWatchListDTO.builder()
-                            .movieId(watchlist.getMovieId())
-                            .addedAt(watchlist.getAddedAt().toString())
+                    return ResponseFavoriteListDTO.builder()
+                            .movieId(favoriteList.getMovieId())
+                            .addedAt(favoriteList.getAddedAt().toString())
                             .title(movie != null ? movie.getTitle() : null)
                             .posterPath(movie != null ? movie.getPoster_path() : null)
                             .overview(movie != null ? movie.getOverview() : null)
@@ -69,9 +69,9 @@ public class WatchListService {
                 .collect(Collectors.toList());
     }
 
-    public void removeWatchlist(String movieId, String userId) {
-        WatchList watchlist = watchListRepository.findByMovieIdAndUserId(movieId, userId)
+    public void removeFavoritelist(String movieId, String userId) {
+        FavoriteList favoriteList = favoriteListRepository.findByMovieIdAndUserId(movieId, userId)
                 .orElseThrow(() -> new WatchListNotFoundException("Watchlist not found"));
-        watchListRepository.delete(watchlist);
+        favoriteListRepository.delete(favoriteList);
     }
 }
