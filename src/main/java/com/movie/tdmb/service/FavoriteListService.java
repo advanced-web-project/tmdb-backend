@@ -2,10 +2,7 @@ package com.movie.tdmb.service;
 
 import com.movie.tdmb.dto.RequestFavoriteListDTO;
 import com.movie.tdmb.dto.ResponseFavoriteListDTO;
-import com.movie.tdmb.exception.DuplicateWatchListException;
-import com.movie.tdmb.exception.MovieNotFoundException;
-import com.movie.tdmb.exception.UserNotFoundException;
-import com.movie.tdmb.exception.WatchListNotFoundException;
+import com.movie.tdmb.exception.*;
 import com.movie.tdmb.model.FavoriteList;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.repository.FavoriteListRepository;
@@ -71,7 +68,7 @@ public class FavoriteListService {
 
     public void removeFavoritelist(String movieId, String userId) {
         FavoriteList favoriteList = favoriteListRepository.findByMovieIdAndUserId(movieId, userId)
-                .orElseThrow(() -> new WatchListNotFoundException("Watchlist not found"));
+                .orElseThrow(() -> new FavoriteListNotFoundException("Favoritelist not found"));
         favoriteListRepository.delete(favoriteList);
     }
 }
