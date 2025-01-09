@@ -6,20 +6,15 @@ import com.movie.tdmb.exception.DuplicateWatchListException;
 import com.movie.tdmb.exception.MovieNotFoundException;
 import com.movie.tdmb.exception.UserNotFoundException;
 import com.movie.tdmb.exception.WatchListNotFoundException;
-import com.movie.tdmb.mapper.WatchListMapper;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.model.WatchList;
 import com.movie.tdmb.repository.MovieRepository;
 import com.movie.tdmb.repository.UserRepository;
 import com.movie.tdmb.repository.WatchListRepository;
-import org.bson.codecs.jsr310.LocalDateTimeCodec;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
