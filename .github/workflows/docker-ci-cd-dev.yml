@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Dev Build
     runs-on: ubuntu-latest
 
     env:
