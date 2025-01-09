@@ -11,6 +11,19 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MAIL_ACCOUNT: ${{ secrets.MAIL_ACCOUNT }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      CLIENT_ID: ${{ secrets.CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+      REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
