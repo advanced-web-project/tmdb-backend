@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MovieService {
@@ -66,4 +68,17 @@ public class MovieService {
                 .data(pages.getContent())
                 .build();
     }
+
+    public DataPageResponse getMoviesByIds(List<String> ids, Pageable pageable) {
+        Page<Movie> pages = movieRepository.findMoviesByIds(ids, pageable);
+
+        return DataPageResponse.builder()
+                .page(pages.getNumber())
+                .totalResults((int) pages.getTotalElements())
+                .perPage(pages.getSize())
+                .totalPages(pages.getTotalPages())
+                .data(pages.getContent())
+                .build();
+    }
+
 }

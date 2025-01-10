@@ -10,8 +10,10 @@ import java.util.Optional;
 
 public interface MovieRepository extends MongoRepository<Movie, String> {
     Optional<Movie> findById(String id);
-    List<Movie> findByTitle(String title);
-    List<Movie> findByIdIn(List<String> ids);
+    Optional<Movie> findById(Long id);
+    @Query("{ '_id': { $in: ?0 } }")
+    Page<Movie> findMoviesByIds(List<String> ids, Pageable pageable);
+    Page<Movie> findByIdIn(List<String> ids, Pageable pageable);
     Page<Movie> findAll(Pageable pageable);
     @Query("{ 'categories': { $in: [?0] } }")
     Page<Movie> findByCategoriesContainingType(String type, Pageable pageable);
