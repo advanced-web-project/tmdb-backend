@@ -10,7 +10,6 @@ import com.movie.tdmb.repository.MovieTrendingDayRepository;
 import com.movie.tdmb.repository.MovieTrendingWeekRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -45,5 +44,26 @@ public class MovieService {
                     .build();
         }
         return null;
+    }
+    public DataPageResponse getMovies(Pageable pageable) {
+        Page<Movie> pages = movieRepository.findAll(pageable);
+        return DataPageResponse.builder()
+                .page(pages.getNumber())
+                .totalResults((int) pages.getTotalElements())
+                .perPage(pages.getSize())
+                .totalPages(pages.getTotalPages())
+                .data(pages.getContent())
+                .build();
+    }
+
+    public DataPageResponse getMovieCategoriesMovieBaseType(String type, Pageable pageable) {
+        Page<Movie> pages = movieRepository.findByCategoriesContainingType(type, pageable);
+        return DataPageResponse.builder()
+                .page(pages.getNumber())
+                .totalResults((int) pages.getTotalElements())
+                .perPage(pages.getSize())
+                .totalPages(pages.getTotalPages())
+                .data(pages.getContent())
+                .build();
     }
 }
