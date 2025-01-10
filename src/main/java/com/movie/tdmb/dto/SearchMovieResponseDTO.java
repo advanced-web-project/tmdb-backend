@@ -9,5 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ResponseSearchDTO {
+public class SearchMovieResponseDTO {
+    private int status;
+    private SearchMovieResultDTO data;
 }
