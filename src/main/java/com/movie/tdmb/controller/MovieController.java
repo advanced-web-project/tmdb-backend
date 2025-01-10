@@ -42,4 +42,32 @@ public class MovieController {
         return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
     }
 
+    /**
+     * Get all movies
+     * @param pageable
+     * @return
+     */
+    @GetMapping
+    public ResponseEntity<?> getMovies(Pageable pageable) {
+        DataPageResponse dataPageResponse = movieService.getMovies(pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Get movies by categories
+     * @param type
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/categories/{type}")
+    public ResponseEntity<?> getCategoriesMovies(@PathVariable String type, Pageable pageable) {
+        DataPageResponse dataPageResponse = movieService.getMovieCategoriesMovieBaseType(type, pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -15,6 +16,8 @@ public class ResponseProfileDTO {
     private String userId;
     private String username;
     private String email;
+    private String profile;
+    private String createdAt;
     private List<ResponseWatchListDTO> watchlist;
     private List<ResponseFavoriteListDTO> favoriteList;
     private List<ResponseRatingDTO> ratings;

@@ -37,6 +37,8 @@ public class ProfileService {
                 .userId(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .profile(user.getProfile())
+                .createdAt(user.getCreatedAt().toString())
                 .watchlist(watchlist)
                 .favoriteList(favoriteList)
                 .ratings(ratings)
