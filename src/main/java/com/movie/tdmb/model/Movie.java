@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
-import java.util.Map;
 
 @Document(collection = "movies")
 @Data
@@ -40,4 +39,8 @@ public class Movie {
     private boolean video;
     private double vote_average;
     private int vote_count;
+    private Credit credits;
+    private List<Trailer> trailers;
+    private List<Keyword> keywords;
+    private List<Review> reviews;
 }
