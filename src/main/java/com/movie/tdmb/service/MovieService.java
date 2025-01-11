@@ -2,6 +2,7 @@ package com.movie.tdmb.service;
 
 import com.movie.tdmb.dto.DataPageResponse;
 import com.movie.tdmb.dto.DataPageResponseExpand;
+import com.movie.tdmb.dto.TrailerWithMovieInfo;
 import com.movie.tdmb.exception.MovieNotFoundException;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.model.MovieTrendingDay;
@@ -94,7 +95,7 @@ public class MovieService {
         int limit = pageable.getPageSize();
 
 
-        List<Trailer> trailers = movieRepository.findLastTrailersByCategory(type, skip, limit);
+        List<TrailerWithMovieInfo> trailers = movieRepository.findLastTrailersByCategory(type, skip, limit);
 
         long totalTrailers = movieRepository.countByCategoriesContainingAndTrailersNotEmpty(type);
 

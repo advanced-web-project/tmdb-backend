@@ -1,4 +1,5 @@
 package com.movie.tdmb.repository;
+import com.movie.tdmb.dto.TrailerWithMovieInfo;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.model.Trailer;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,11 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
             "{ $match: { 'categories': { $regex: ?0, $options: 'i' }, 'trailers': { $exists: true, $ne: [] } } }",
             "{ $unwind: '$trailers' }",
             "{ $sort: { 'trailers.published_at': -1 } }",
-            "{ $replaceRoot: { newRoot: '$trailers' } }",
+            "{ $project: { 'trailer': '$trailers', 'tmdb_id': 1, 'title': 1, 'poster_path': 1 } }",
             "{ $skip: ?1 }",
             "{ $limit: ?2 }"
     })
-    List<Trailer> findLastTrailersByCategory(String category, int skip, int limit);
+    List<TrailerWithMovieInfo> findLastTrailersByCategory(String category, int skip, int limit);
     @Query(value = "{ 'categories': { $regex: ?0, $options: 'i' }, 'trailers': { $exists: true, $ne: [] } }", count = true)
     long countByCategoriesContainingAndTrailersNotEmpty(String category);
     @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
