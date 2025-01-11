@@ -27,7 +27,7 @@ public class PersonService {
                 .build();
     }
 
-    public Person getPersonById(String id) {
+    public Person getPersonById(Long id) {
         return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person not found"));
     }
 }

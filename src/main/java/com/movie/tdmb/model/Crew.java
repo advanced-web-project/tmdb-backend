@@ -1,11 +1,13 @@
 package com.movie.tdmb.model;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Data
 public class Crew {
     private Boolean adult;
     private Integer gender;
+    @Field("id")
     private Long id;
     private String known_for_department;
     private String name;

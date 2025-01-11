@@ -1,5 +1,6 @@
 package com.movie.tdmb.controller;
 import com.movie.tdmb.dto.DataPageResponse;
+import com.movie.tdmb.dto.DataPageResponseExpand;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.service.MovieService;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +77,15 @@ public class MovieController {
     @GetMapping("/categories/{type}")
     public ResponseEntity<?> getCategoriesMovies(@PathVariable String type, Pageable pageable) {
         DataPageResponse dataPageResponse = movieService.getMovieCategoriesMovieBaseType(type, pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/lasttrailers/categories/{type}")
+    public ResponseEntity<?> getLastTrailersByCategories(@PathVariable String type, Pageable pageable) {
+        DataPageResponseExpand dataPageResponse = movieService.getLastTrailersByCategories(type, pageable);
         if(dataPageResponse == null) {
             return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
         }
