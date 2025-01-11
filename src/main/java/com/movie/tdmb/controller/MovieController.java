@@ -27,6 +27,17 @@ public class MovieController {
         Movie movie = movieService.getMovieById(id);
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
+
+    /**
+     * Get movie by tmdb id
+     * @param tmdbId
+     * @return
+     */
+    @GetMapping("tmdb/{tmdbId}")
+    public ResponseEntity<?> getMovieByTmdbId(@PathVariable Long tmdbId) {
+        Movie movie = movieService.getMovieByTmdbId(tmdbId);
+        return new ResponseEntity<>(movie, HttpStatus.OK);
+    }
     /**
      * Get trending movies
      * @param type

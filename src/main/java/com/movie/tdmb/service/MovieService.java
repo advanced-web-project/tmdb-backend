@@ -22,6 +22,9 @@ public class MovieService {
     public Movie getMovieById(String id) {
         return movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
     }
+    public Movie getMovieByTmdbId(Long tmdbId) {
+        return movieRepository.findByTmdbId(tmdbId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
+    }
     public DataPageResponse getMovieTrendingMovieBaseType(String type,Pageable pageable) {
         if (type.toLowerCase().equals("week")) {
             Page<MovieTrendingWeek> pages = movieTrendingWeekRepository.findAll(pageable);

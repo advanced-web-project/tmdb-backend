@@ -17,5 +17,5 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
     Page<Movie> findByCategoriesContainingType(String type, Pageable pageable);
     @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
     List<Movie> findByTitleContaining(String query);
-
+    Optional<Movie> findByTmdbId(Long tmdbId);
 }
