@@ -114,10 +114,14 @@ public class SearchService {
             // Search for movies by actor name
             return personRepository.findByNameContainingIgnoreCase(query)
                     .stream()
-                    .filter(person -> person.getMovie_credits() != null && person.getMovie_credits().getCast() != null)
+                    .filter(person -> person.getMovie_credits() != null &&
+                            person.getMovie_credits().getCast() != null &&
+                            !person.getMovie_credits().getCast().isEmpty())
                     .flatMap(person -> person.getMovie_credits().getCast().stream())
-                    .map(cast -> cast.getId()) // Extract Long movie ID from the cast
+                    .map(MovieCast::getId)
+                    .distinct()
                     .collect(Collectors.toList());
+
         } else {
             throw new IllegalArgumentException("Invalid type");
         }
