@@ -13,7 +13,7 @@ public class Movie {
     @Id
     private String _id;
     @Field("id")
-    private Long id;
+    private Integer id;
     private Boolean adult;
     private String backdrop_path;
     private Object belongs_to_collection;

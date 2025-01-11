@@ -1,6 +1,7 @@
 package com.movie.tdmb.model;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class MovieCast {
     private Boolean adult;
     private String backdrop_path;
     private List<Integer> genre_ids;
+    @Field("id")
     private Long id;
     private String original_language;
     private String original_title;
