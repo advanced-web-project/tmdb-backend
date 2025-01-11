@@ -35,13 +35,24 @@ public class SearchController {
             @RequestParam(value = "trending", required = false) String trending,
             @RequestParam(value = "userscore", required = false) Integer userScore,
             @RequestParam(value = "threshold", required = false) Float threshold,
-            @RequestHeader("Authorization") String token,
+            @RequestHeader(value = "Authorization", required = false) String token, // Token is optional
             Pageable pageable
     ) {
-        String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
+        String userId = null;
 
+        // Check if userScore is provided
+        if (userScore != null) {
+            if (token == null || !token.startsWith("Bearer ")) {
+                return new ResponseEntity<>("Authorization token is required when userScore is provided", HttpStatus.UNAUTHORIZED);
+            }
+            // Extract userId from JWT token
+            userId = jwtUtils.getIdFromJwtToken(token.substring(7));
+        }
+
+        // Call the service to search movies
         List<String> movieIds = searchService.searchMovies(query, type, releaseDate, genre, trending, userScore, userId, threshold);
         DataPageResponse response = movieService.getMoviesByIds(movieIds, pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }
