@@ -15,6 +15,8 @@ public class MovieTrendingDay {
     private Long id;
     private String title;
     private String release_date;
+    @Field("tmdb_id")
+    private Long tmdb_id;
     private String poster_path;
     private Double vote_average;
 }
