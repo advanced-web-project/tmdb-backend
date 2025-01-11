@@ -2,6 +2,7 @@ package com.movie.tdmb.model;
 
 import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -28,5 +29,7 @@ public class Person {
     private String place_of_birth;
     private Double popularity;
     private String profile_path;
+    @Getter
     private MovieCredit movie_credits;
+
 }
