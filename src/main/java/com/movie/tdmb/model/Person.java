@@ -15,7 +15,8 @@ public class Person {
     private String _id;
     @Field("id")
     private Long id;
-    private String tmdb_id;
+    @Field("tmdb_id")
+    private Long tmdbId;
     private Boolean adult;
     private List<String> also_known_as;
     private String biography;

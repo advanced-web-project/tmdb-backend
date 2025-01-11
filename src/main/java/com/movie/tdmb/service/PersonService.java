@@ -28,6 +28,6 @@ public class PersonService {
     }
 
     public Person getPersonById(Long id) {
-        return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException("Person not found"));
+        return personRepository.findByTmdbId(id).orElseThrow(() -> new PersonNotFoundException("Person not found"));
     }
 }

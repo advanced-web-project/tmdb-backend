@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface PersonRepository extends MongoRepository<Person, String> {
     Page<Person> findAll(Pageable pageable);
     Optional<Person> findById(Long id);
+    Optional<Person> findByTmdbId(Long tmdbId);
     List<Person> findByNameContainingIgnoreCase(String name);
 }
