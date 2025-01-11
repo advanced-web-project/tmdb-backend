@@ -80,7 +80,7 @@ public class WebSecurityConfig {
                 // Set session policy to stateless
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/v3/api-docs/**",
+                        .requestMatchers("/auth/**", "/v3/api-docs/**","navigation/**",
                                 "/swagger-ui/**", "/swagger-ui.html",
                                 "/movies/**", "/persons/**").permitAll()
                         // Allow public access to test endpoints
