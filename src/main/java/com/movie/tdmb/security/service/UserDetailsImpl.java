@@ -16,6 +16,7 @@ public class UserDetailsImpl implements UserDetails {
     private String id;
     private String username;
     private String email;
+    private Boolean isActive;
     @JsonIgnore
     private String password;
     private Date passwordChangedAt;
@@ -40,6 +41,7 @@ public class UserDetailsImpl implements UserDetails {
                 .password(user.getPassword())
                 .passwordChangedAt(user.getPasswordChangedAt())
                 .authorities(authorities)
+                .isActive(user.getIsActive())
                 .build();
     }
 
@@ -70,7 +72,7 @@ public class UserDetailsImpl implements UserDetails {
     }
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActive; // Check if the user is active
     }
     @Override
     public boolean equals(Object o) {
