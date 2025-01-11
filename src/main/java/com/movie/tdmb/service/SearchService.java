@@ -116,11 +116,7 @@ public class SearchService {
                     .stream()
                     .filter(person -> person.getMovie_credits() != null && person.getMovie_credits().getCast() != null)
                     .flatMap(person -> person.getMovie_credits().getCast().stream())
-                    .map(MovieCast::getId) // Extract Long movie ID from the cast
-                    .distinct()
-                    .flatMap(movieId -> movieRepository.findById(movieId).stream())
-                    .map(movie -> Long.valueOf(movie.getId()))
-                    .distinct()
+                    .map(cast -> cast.getId()) // Extract Long movie ID from the cast
                     .collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException("Invalid type");
