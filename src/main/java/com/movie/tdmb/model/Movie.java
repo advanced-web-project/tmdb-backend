@@ -21,6 +21,8 @@ public class Movie {
     private Object genres;
     private String homepage;
     private String imdb_id;
+    @Field("tmdb_id")
+    private Long tmdbId;
     private Object origin_country;
     private String original_language;
     private String original_title;

@@ -173,6 +173,17 @@ public class AuthService {
                 .orElseGet(() -> generateRefreshToken(user));
         return refreshToken;
     }
-
+    public void changePassword(ResetPasswordDto resetPasswordDto) {
+        RefreshToken token = refreshTokenRepository.findByToken(resetPasswordDto.getRefreshToken())
+                .orElseThrow(() -> new RefreshTokenNotFoundException("Refresh token not found"));
+        if (token.getExpiryDate().isBefore(Instant.now())) {
+            throw new RefreshTokenExpiredException("Refresh token has expired");
+        }
+        User user = userRepository.findById(token.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found with refresh token"));
+        user.setPassword(passwordEncoder.encode(resetPasswordDto.getPassword()));
+        user.setPasswordChangedAt(new Date());
+        userRepository.save(user);
+    }
 
 }

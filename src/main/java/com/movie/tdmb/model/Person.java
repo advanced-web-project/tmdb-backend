@@ -29,7 +29,5 @@ public class Person {
     private String place_of_birth;
     private Double popularity;
     private String profile_path;
-    @Getter
     private MovieCredit movie_credits;
-
 }

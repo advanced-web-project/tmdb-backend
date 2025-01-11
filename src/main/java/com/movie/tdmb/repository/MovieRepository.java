@@ -37,5 +37,5 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
     long countByCategoriesContainingAndTrailersNotEmpty(String category);
     @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
     List<Movie> findByTitleContaining(String query);
-
+    Optional<Movie> findByTmdbId(Long tmdbId);
 }
