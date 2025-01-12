@@ -18,6 +18,7 @@ public class Movie {
     private String backdrop_path;
     private Object belongs_to_collection;
     private Integer budget;
+    private Object categories;
     private Object genres;
     private String homepage;
     private String imdb_id;

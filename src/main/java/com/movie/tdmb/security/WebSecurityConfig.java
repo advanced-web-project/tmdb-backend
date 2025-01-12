@@ -82,7 +82,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/v3/api-docs/**","navigation/**",
                                 "/swagger-ui/**", "/swagger-ui.html",
-                                "/movies/**", "/persons/**", "/genres/**").permitAll()
+                                "/movies/**", "/persons/**", "/genres/**",
+                                "/search/**").permitAll()
                         // Allow public access to test endpoints
                         .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
