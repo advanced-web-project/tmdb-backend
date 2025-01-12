@@ -13,8 +13,8 @@ permissions:
   statuses: write
 
 jobs:
-  build-and-push:
-    name: Build and Deploy
+  build:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
     env:
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
@@ -28,37 +28,49 @@ jobs:
       CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       REDIRECT_URI: ${{ secrets.REDIRECT_URI }}
       CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
     steps:
+      # Checkout the source code
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Set up JDK 17 for the build
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'temurin'
 
+      # Build the project with Maven
       - name: Build with Maven
         run: mvn clean install
 
-      - name: Run tests
-        run: mvn test
-
+      # Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker build -t hcdman/tmdb-back-end:1.0 .
+      # Build and push Docker image
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t hcdman/tmdb-back-end:1.0 .
+          docker push hcdman/tmdb-back-end:1.0
 
-      - name: Push Docker image
-        run: docker push hcdman/tmdb-back-end:1.0
+  deploy:
+    name: Deploy Docker Image to Azure Web App
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: none
+    environment:
+      name: 'Production'
 
+    steps:
+      # Deploy the Docker image to Azure Web App
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: tmdb-backend
@@ -66,18 +78,9 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: hcdman/tmdb-back-end:1.0
 
-      - name: Post Deployment URL
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const deploymentUrl = "https://tmdb-backend-cqbrdcdkfsbqh0gw.japaneast-01.azurewebsites.net";
-            core.setOutput("deployment_url", deploymentUrl);
-            github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.sha,
-              state: "success",
-              target_url: deploymentUrl,
-              description: "Deployment successful!",
-              context: "Deployment URL",
-            });
+      # Display the deployment URL
+      - name: Set Deployment URL
+        run: echo "webapp-url=https://tmdb-backend-cqbrdcdkfsbqh0gw.japaneast-01.azurewebsites.net" >> $GITHUB_ENV
+
+    outputs:
+      webapp-url: https://tmdb-backend-cqbrdcdkfsbqh0gw.japaneast-01.azurewebsites.net
