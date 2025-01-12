@@ -1,6 +1,7 @@
 package com.movie.tdmb.service;
 
 import com.movie.tdmb.dto.SearchMovieResponseDTO;
+import com.movie.tdmb.exception.InvalidDataException;
 import com.movie.tdmb.model.*;
 import com.movie.tdmb.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for handling movie search operations.
+ * This class provides methods to process search queries, filter movies based on various criteria,
+ * and retrieve results from the database or external APIs.
+ */
 @Service
 public class SearchService {
 
@@ -32,141 +38,140 @@ public class SearchService {
     private PersonRepository personRepository;
 
     /**
-     * Search movies based on various criteria such as query type, trending status, release date, genre, etc.
+     * Search for movies based on multiple criteria, such as query type, genres, categories, release date,
+     * user score, and trending status.
      *
-     * @param query         The search query string.
-     * @param type          The type of search (e.g., "movieName", "actorName", "naturalQuery").
-     * @param releaseDate   The release date to filter movies.
-     * @param genre         The genre to filter movies.
-     * @param trending      Indicates if movies are trending ("day" or "week").
-     * @param userScore     User score filter.
-     * @param userId        The user ID for personalized recommendations.
-     * @param threshold     Threshold for external retriever API.
+     * @param query             The search query string.
+     * @param type              The type of search (e.g., "movieName", "actorName", "naturalQuery").
+     * @param releaseDateBegin  Start date for filtering movies by release date.
+     * @param releaseDateEnd    End date for filtering movies by release date.
+     * @param genres            List of genre IDs to filter movies by.
+     * @param categories        List of categories to filter movies by.
+     * @param trending          Indicates whether the movies are trending ("day" or "week").
+     * @param userScoreBegin    Minimum user score for filtering movies.
+     * @param userScoreEnd      Maximum user score for filtering movies.
+     * @param threshold         Threshold for external retriever API.
      * @return A list of movie IDs that match the search criteria.
      */
-    public List<String> searchMovies(String query, String type, String releaseDate, String genre, String trending, Integer userScore, String userId, Float threshold) {
+    public List<String> searchMovies(String query, String type, String releaseDateBegin, String releaseDateEnd,
+                                     List<Integer> genres, List<String> categories, String trending,
+                                     Double userScoreBegin, Double userScoreEnd, Float threshold) {
         List<Long> finalMovieIds;
 
-        // Check if the "trending" parameter is provided
+        // Filter movies based on trending type if specified
         if (trending != null && !trending.isEmpty()) {
-            List<Long> trendingMovieIds = Collections.emptyList();
+            List<Long> trendingMovieIds = retrieveTrendingMovieIds(trending);
 
-            // Retrieve trending movie IDs based on the trending type
-            if ("day".equalsIgnoreCase(trending)) {
-                trendingMovieIds = movieTrendingDayRepository.findAll()
-                        .stream()
-                        .map(MovieTrendingDay::getId)
-                        .collect(Collectors.toList());
-            } else if ("week".equalsIgnoreCase(trending)) {
-                trendingMovieIds = movieTrendingWeekRepository.findAll()
-                        .stream()
-                        .map(MovieTrendingWeek::getId)
-                        .collect(Collectors.toList());
-            }
-
-            // Process the query based on its type
+            // Process query based on type and intersect results with trending movies
             List<Long> typeMovieIds = processQueryByType(query, type, threshold);
-
-            // Combine trending movies and query result (intersection)
-            if (!trendingMovieIds.isEmpty() && !typeMovieIds.isEmpty()) {
-                finalMovieIds = trendingMovieIds.stream()
-                        .filter(typeMovieIds::contains)
-                        .collect(Collectors.toList());
-            } else {
-                finalMovieIds = !trendingMovieIds.isEmpty() ? trendingMovieIds : typeMovieIds;
-            }
+            finalMovieIds = trendingMovieIds.stream()
+                    .filter(typeMovieIds::contains)
+                    .collect(Collectors.toList());
         } else {
-            // If no trending parameter, process only by query type
+            // If no trending filter is applied, process query based on type only
             finalMovieIds = processQueryByType(query, type, threshold);
         }
 
-        // Fetch movies from the database using their IDs
+        // Fetch movies from the database by their IDs
         List<Movie> movies = movieRepository.findAllByIds(finalMovieIds);
 
-        // Convert movies to their respective String IDs (_id field)
+        // Convert movie entities to a list of string IDs (_id field)
         List<String> finalIds = movies.stream()
                 .map(Movie::get_id)
                 .collect(Collectors.toList());
 
-        // Apply additional filters based on release date, genre, and user score
-        return applyFilters(finalIds, releaseDate, genre, userScore, userId);
+        // Apply additional filters (release date, genres, categories, and user scores)
+        return applyFilters(finalIds, releaseDateBegin, releaseDateEnd, genres, categories, userScoreBegin, userScoreEnd);
     }
 
     /**
-     * Process the query based on its type (e.g., "naturalQuery", "movieName", "actorName").
+     * Process the search query based on the specified type, such as natural query, movie name, or actor name.
      *
      * @param query     The search query string.
      * @param type      The type of the query.
      * @param threshold Threshold for external retriever API.
-     * @return A list of movie IDs as Long values.
+     * @return A list of movie IDs (as Long values) matching the query criteria.
      */
     private List<Long> processQueryByType(String query, String type, Float threshold) {
-        if ("naturalQuery".equalsIgnoreCase(type)) {
-            // Call external API for natural language query processing
-            return callExternalRetrieverAPI(query, threshold);
-        } else if ("movieName".equalsIgnoreCase(type)) {
-            // Search for movies by their title in the database
-            return movieRepository.findByTitleContaining(query)
-                    .stream()
-                    .map(movie -> Long.valueOf(movie.getId()))
-                    .collect(Collectors.toList());
-        } else if ("actorName".equalsIgnoreCase(type)) {
-            // Search for movies by actor name
-            return personRepository.findByNameContainingIgnoreCase(query)
-                    .stream()
-                    .filter(person -> person.getMovie_credits() != null &&
-                            person.getMovie_credits().getCast() != null &&
-                            !person.getMovie_credits().getCast().isEmpty())
-                    .flatMap(person -> person.getMovie_credits().getCast().stream())
-                    .map(MovieCast::getId)
-                    .distinct()
-                    .collect(Collectors.toList());
-
-        } else {
-            throw new IllegalArgumentException("Invalid type");
+        switch (type.toLowerCase()) {
+            case "naturalquery":
+                return callExternalRetrieverAPI(query, threshold);
+            case "moviename":
+                return movieRepository.findByTitleContaining(query)
+                        .stream()
+                        .map(movie -> Long.valueOf(movie.getId()))
+                        .collect(Collectors.toList());
+            case "actorname":
+                return personRepository.findByNameContainingIgnoreCase(query)
+                        .stream()
+                        .filter(person -> person.getMovie_credits() != null &&
+                                person.getMovie_credits().getCast() != null &&
+                                !person.getMovie_credits().getCast().isEmpty())
+                        .flatMap(person -> person.getMovie_credits().getCast().stream())
+                        .map(MovieCast::getId)
+                        .distinct()
+                        .collect(Collectors.toList());
+            default:
+                throw new IllegalArgumentException("Invalid query type");
         }
     }
 
     /**
-     * Apply additional filters to the list of movie IDs.
+     * Retrieve trending movie IDs based on the specified trending type ("day" or "week").
      *
-     * @param movieIds    List of movie IDs.
-     * @param releaseDate Release date filter.
-     * @param genre       Genre filter.
-     * @param userScore   User score filter.
-     * @param userId      User ID for personalized filtering.
-     * @return Filtered list of movie IDs.
+     * @param trending The trending type (day/week).
+     * @return A list of trending movie IDs.
      */
-    private List<String> applyFilters(List<String> movieIds, String releaseDate, String genre, Integer userScore, String userId) {
-        if (releaseDate != null) {
-            movieIds = movieIds.stream()
-                    .filter(movieId -> {
-                        Movie movie = movieRepository.findById(movieId).orElse(null);
-                        return movie != null && movie.getRelease_date().startsWith(releaseDate);
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        if (genre != null) {
-            movieIds = movieIds.stream()
-                    .filter(movieId -> {
-                        Movie movie = movieRepository.findById(movieId).orElse(null);
-                        return movie != null && movie.getGenres().toString().contains(genre);
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        if (userScore != null) {
-            List<String> filteredMovieIds = ratingRepository.findByUserIdAndScore(userId, userScore)
+    private List<Long> retrieveTrendingMovieIds(String trending) {
+        if ("day".equalsIgnoreCase(trending)) {
+            return movieTrendingDayRepository.findAll()
                     .stream()
-                    .map(Rating::getMovieId)
+                    .map(MovieTrendingDay::getId)
                     .collect(Collectors.toList());
-            movieIds = movieIds.stream()
-                    .filter(filteredMovieIds::contains)
+        } else if ("week".equalsIgnoreCase(trending)) {
+            return movieTrendingWeekRepository.findAll()
+                    .stream()
+                    .map(MovieTrendingWeek::getId)
                     .collect(Collectors.toList());
         }
+        return Collections.emptyList();
+    }
 
-        return movieIds;
+    /**
+     * Apply additional filters to a list of movie IDs, such as release date range, genres, categories, and user scores.
+     *
+     * @param movieIds         List of movie IDs to filter.
+     * @param releaseDateBegin Start date for filtering movies by release date.
+     * @param releaseDateEnd   End date for filtering movies by release date.
+     * @param genres           List of genres to filter by.
+     * @param categories       List of categories to filter by.
+     * @param userScoreBegin   Minimum user score for filtering.
+     * @param userScoreEnd     Maximum user score for filtering.
+     * @return A filtered list of movie IDs.
+     */
+    private List<String> applyFilters(List<String> movieIds, String releaseDateBegin, String releaseDateEnd,
+                                      List<Integer> genres, List<String> categories,
+                                      Double userScoreBegin, Double userScoreEnd) {
+        // Validate date range
+        if (releaseDateBegin != null && releaseDateEnd != null && releaseDateEnd.compareTo(releaseDateBegin) < 0) {
+            throw new InvalidDataException("Release date end must be greater than or equal to release date begin.");
+        }
+
+        // Validate user score range
+        if (userScoreBegin != null && userScoreEnd != null && userScoreEnd < userScoreBegin) {
+            throw new InvalidDataException("User score end must be greater than or equal to user score begin.");
+        }
+
+        // Apply filters using MongoDB repository aggregation
+        return movieRepository.findFilteredMovieIds(
+                movieIds,
+                releaseDateBegin != null ? releaseDateBegin : "0000-01-01",
+                releaseDateEnd != null ? releaseDateEnd : "9999-12-31",
+                genres != null ? genres : Collections.emptyList(),
+                categories != null ? categories : Collections.emptyList(),
+                userScoreBegin != null ? userScoreBegin : 0.0,
+                userScoreEnd != null ? userScoreEnd : 10.0
+        );
     }
 
     /**
@@ -174,7 +179,7 @@ public class SearchService {
      *
      * @param query     The query string.
      * @param threshold Threshold for the API.
-     * @return A list of movie IDs as Long values.
+     * @return A list of movie IDs (as Long values) retrieved from the API.
      */
     private List<Long> callExternalRetrieverAPI(String query, Float threshold) {
         RestTemplate restTemplate = new RestTemplate();
@@ -186,14 +191,9 @@ public class SearchService {
 
             SearchMovieResponseDTO response = restTemplate.getForObject(url, SearchMovieResponseDTO.class);
             if (response != null && response.getData() != null) {
-                // Step 1: Get String IDs from the API response
                 List<String> stringIds = response.getData().getResult();
-
-                // Step 2: Fetch movies from the database
-                List<Movie> movies = movieRepository.findMoviesByIds(stringIds);
-
-                // Step 3: Convert movies to Long IDs
-                return movies.stream()
+                return movieRepository.findMoviesByIds(stringIds)
+                        .stream()
                         .map(movie -> Long.valueOf(movie.getId()))
                         .collect(Collectors.toList());
             }
