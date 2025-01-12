@@ -1,7 +1,7 @@
 package com.movie.tdmb.controller;
 
 import com.movie.tdmb.dto.DataPageResponse;
-import com.movie.tdmb.dto.SearchMovieResponseDTO;
+import com.movie.tdmb.dto.SearchMovieRequest;
 import com.movie.tdmb.security.jwt.JwtUtils;
 import com.movie.tdmb.service.MovieService;
 import com.movie.tdmb.service.SearchService;
@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST Controller for handling search operations related to movies.
+ * It provides an endpoint for searching movies with various filters.
+ */
 @RestController
 @RequestMapping("/search")
 public class SearchController {
@@ -26,33 +30,37 @@ public class SearchController {
     @Autowired
     private MovieService movieService;
 
-    @GetMapping("/movie")
+    /**
+     * Handles the search request for movies.
+     * This method processes a POST request to filter movies based on the provided criteria.
+     *
+     * @param request  The search parameters including query, genres, categories, dates, user scores, etc.
+     * @param pageable Pagination information to return a paginated list of results.
+     * @return A ResponseEntity containing a paginated response of movies that match the search criteria.
+     */
+    @PostMapping("/movie")
     public ResponseEntity<?> searchMovies(
-            @RequestParam("query") String query,
-            @RequestParam(value = "type", required = false) String type,
-            @RequestParam(value = "release_date", required = false) String releaseDate,
-            @RequestParam(value = "genre", required = false) String genre,
-            @RequestParam(value = "trending", required = false) String trending,
-            @RequestParam(value = "userscore", required = false) Integer userScore,
-            @RequestParam(value = "threshold", required = false) Float threshold,
-            @RequestHeader(value = "Authorization", required = false) String token, // Token is optional
+            @RequestBody SearchMovieRequest request,  // Use @RequestBody to retrieve search parameters from the request body
             Pageable pageable
     ) {
-        String userId = null;
+        // Call the search service to find movies based on the search request parameters
+        List<String> movieIds = searchService.searchMovies(
+                request.getQuery(),                // The search query string
+                request.getType(),                 // The type of search (e.g., movieName, actorName, naturalQuery)
+                request.getReleaseDateBegin(),     // The start date for filtering by release date
+                request.getReleaseDateEnd(),       // The end date for filtering by release date
+                request.getGenres(),               // A list of genre IDs to filter by
+                request.getCategories(),           // A list of categories to filter by
+                request.getTrending(),             // Trending filter (day or week)
+                request.getUserScoreBegin(),       // Minimum user score for filtering
+                request.getUserScoreEnd(),         // Maximum user score for filtering
+                request.getThreshold()             // Threshold value for external retrievers
+        );
 
-        // Check if userScore is provided
-        if (userScore != null) {
-            if (token == null || !token.startsWith("Bearer ")) {
-                return new ResponseEntity<>("Authorization token is required when userScore is provided", HttpStatus.UNAUTHORIZED);
-            }
-            // Extract userId from JWT token
-            userId = jwtUtils.getIdFromJwtToken(token.substring(7));
-        }
-
-        // Call the service to search movies
-        List<String> movieIds = searchService.searchMovies(query, type, releaseDate, genre, trending, userScore, userId, threshold);
+        // Retrieve detailed movie data based on the filtered movie IDs and paginate the results
         DataPageResponse response = movieService.getMoviesByIds(movieIds, pageable);
+
+        // Return the response as an HTTP OK status
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }
