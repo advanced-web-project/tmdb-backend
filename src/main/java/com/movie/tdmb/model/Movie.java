@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
-import java.util.Map;
 
 @Document(collection = "movies")
 @Data
@@ -14,30 +13,36 @@ public class Movie {
     @Id
     private String _id;
     @Field("id")
-    private Long id;
-    private boolean adult;
+    private Integer id;
+    private Boolean adult;
     private String backdrop_path;
     private Object belongs_to_collection;
-    private int budget;
+    private Integer budget;
     private Object genres;
     private String homepage;
     private String imdb_id;
+    @Field("tmdb_id")
+    private Long tmdbId;
     private Object origin_country;
     private String original_language;
     private String original_title;
     private String overview;
-    private double popularity;
+    private Double popularity;
     private String poster_path;
     private Object production_companies;
     private Object production_countries;
     private String release_date;
-    private int revenue;
+    private Integer revenue;
     private Integer runtime;
     private Object spoken_languages;
     private String status;
     private String tagline;
     private String title;
-    private boolean video;
-    private double vote_average;
-    private int vote_count;
+    private Boolean video;
+    private Double vote_average;
+    private Integer vote_count;
+    private Credit credits;
+    private List<Trailer> trailers;
+    private List<Keyword> keywords;
+    private List<Review> reviews;
 }

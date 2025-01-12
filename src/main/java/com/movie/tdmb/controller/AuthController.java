@@ -1,7 +1,6 @@
 package com.movie.tdmb.controller;
-import com.movie.tdmb.dto.SignInDto;
-import com.movie.tdmb.dto.SignUpDto;
-import com.movie.tdmb.dto.VerifyOtpDto;
+
+import com.movie.tdmb.dto.*;
 import com.movie.tdmb.model.RefreshToken;
 import com.movie.tdmb.model.User;
 import com.movie.tdmb.service.AuthService;
@@ -9,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,14 +60,14 @@ public class AuthController {
         return ResponseEntity.ok("Account active successfully");
     }
     /**
-     * Refreshes the access token.
+     * Refreshes an access token.
      *
-     * @param request the request containing the refresh token
+     * @param newAccessTokenDto the NewAccessTokenDto containing the refresh token
      * @return a ResponseEntity containing the new access token
      */
     @PostMapping("refresh-token")
-    public ResponseEntity<String> refreshToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
+    public ResponseEntity<String> refreshToken(@RequestBody NewAccessTokenDto newAccessTokenDto) {
+        String refreshToken = newAccessTokenDto.getRefreshToken();
         String newAccessToken = authService.getNewAccessToken(refreshToken);
         return new ResponseEntity<>(newAccessToken, HttpStatus.OK);
     }
@@ -102,5 +100,17 @@ public class AuthController {
     ResponseEntity<?> outboundAuthenticate(@RequestParam("code") String code) throws Exception {
         var result = authService.outboundAuthentication(code);
         return ResponseEntity.ok().body(result);
+    }
+
+    /**
+     * Handles POST requests to reset the user's password.
+     *
+     * @param resetPasswordDto the DTO containing the necessary information to reset the password
+     * @return a ResponseEntity indicating the success of the password change operation
+     */
+    @PostMapping("/reset-password")
+    ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        authService.changePassword(resetPasswordDto);
+        return ResponseEntity.ok("Password changed successfully");
     }
 }

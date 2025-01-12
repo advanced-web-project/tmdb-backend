@@ -14,6 +14,8 @@ public class MovieTrendingWeek {
     private Long id;
     private String title;
     private String release_date;
+    @Field("tmdb_id")
+    private Long tmdbId;
     private String poster_path;
     private Double vote_average;
 }

@@ -1,5 +1,6 @@
 package com.movie.tdmb.controller;
 import com.movie.tdmb.dto.DataPageResponse;
+import com.movie.tdmb.dto.DataPageResponseExpand;
 import com.movie.tdmb.model.Movie;
 import com.movie.tdmb.service.MovieService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,17 @@ public class MovieController {
         Movie movie = movieService.getMovieById(id);
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
+
+    /**
+     * Get movie by tmdb id
+     * @param tmdbId
+     * @return
+     */
+    @GetMapping("tmdb/{tmdbId}")
+    public ResponseEntity<?> getMovieByTmdbId(@PathVariable Long tmdbId) {
+        Movie movie = movieService.getMovieByTmdbId(tmdbId);
+        return new ResponseEntity<>(movie, HttpStatus.OK);
+    }
     /**
      * Get trending movies
      * @param type
@@ -42,4 +54,41 @@ public class MovieController {
         return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
     }
 
+    /**
+     * Get all movies
+     * @param pageable
+     * @return
+     */
+    @GetMapping
+    public ResponseEntity<?> getMovies(Pageable pageable) {
+        DataPageResponse dataPageResponse = movieService.getMovies(pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
+
+    /**
+     * Get movies by categories
+     * @param type
+     * @param pageable
+     * @return
+     */
+    @GetMapping("/categories/{type}")
+    public ResponseEntity<?> getCategoriesMovies(@PathVariable String type, Pageable pageable) {
+        DataPageResponse dataPageResponse = movieService.getMovieCategoriesMovieBaseType(type, pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/lasttrailers/categories/{type}")
+    public ResponseEntity<?> getLastTrailersByCategories(@PathVariable String type, Pageable pageable) {
+        DataPageResponseExpand dataPageResponse = movieService.getLastTrailersByCategories(type, pageable);
+        if(dataPageResponse == null) {
+            return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
 }
