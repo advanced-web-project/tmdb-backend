@@ -84,7 +84,7 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**", "/swagger-ui.html",
                                 "/movies/**", "/persons/**").permitAll()
                         // Allow public access to test endpoints
-                        .anyRequest().authenticated());
+                        .anyRequest().permitAll());
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build(); // Build and return the security filter chain
