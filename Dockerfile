@@ -11,4 +11,5 @@ RUN mvn package -DskipTests
 FROM amazoncorretto:17
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+EXPOSE 80
 ENTRYPOINT ["java", "-jar", "app.jar"]
