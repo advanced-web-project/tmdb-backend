@@ -61,7 +61,7 @@ jobs:
       contents: none
     environment:
       name: 'Production'
-      url: 'https://tmdb-backend-cqbrdcdkfsbqh0gw.japaneast-01.azurewebsites.net'
+      url: 'https://tmdb-acedhqe6c0atfrb6.japanwest-01.azurewebsites.net'
 
     steps:
       - name: Deploy to Azure Web App
