@@ -50,19 +50,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker buildx create --use 
-          docker buildx build --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
-                               --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
-                               --build-arg MAIL_ACCOUNT=${{ secrets.MAIL_ACCOUNT }} \
-                               --build-arg MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }} \
-                               --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
-                               --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
-                               --build-arg REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
-                               --build-arg CLIENT_ID=${{ secrets.CLIENT_ID }} \
-                               --build-arg CLIENT_SECRET=${{ secrets.CLIENT_SECRET }} \
-                               --build-arg REDIRECT_URI=${{ secrets.REDIRECT_URI }} \
-                               --build-arg CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }} \
-                               -t hcdman/tmdb-back-end:1.0 .  # The period here is the build context
+          docker build -t hcdman/tmdb-back-end:1.0 .
           docker push hcdman/tmdb-back-end:1.0
 
   deploy:
