@@ -2,22 +2,22 @@ package com.movie.tdmb.controller;
 import com.movie.tdmb.dto.DataPageResponse;
 import com.movie.tdmb.dto.DataPageResponseExpand;
 import com.movie.tdmb.model.Movie;
+import com.movie.tdmb.security.jwt.JwtUtils;
 import com.movie.tdmb.service.MovieService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("movies")
 @RequiredArgsConstructor
 public class MovieController {
     private final MovieService movieService;
+    private final JwtUtils jwtUtils;
     /**
      * Get movie by id
      * @param id
@@ -35,7 +35,12 @@ public class MovieController {
      * @return
      */
     @GetMapping("tmdb/{tmdbId}")
-    public ResponseEntity<?> getMovieByTmdbId(@PathVariable Long tmdbId) {
+    public ResponseEntity<?> getMovieByTmdbId(@PathVariable Long tmdbId, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String userId = jwtUtils.getIdFromJwtToken(authHeader.substring(7));
+            movieService.addMovieToUserHistory(userId, tmdbId);
+        }
         Movie movie = movieService.getMovieByTmdbId(tmdbId);
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
@@ -90,5 +95,15 @@ public class MovieController {
             return new ResponseEntity<>("Invalid type", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(dataPageResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("recommendation")
+    public ResponseEntity<?> getHistoryByUserId(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String userId = jwtUtils.getIdFromJwtToken(authHeader.substring(7));
+            return new ResponseEntity<>(movieService.getRecommendationMovies(userId), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
     }
 }
