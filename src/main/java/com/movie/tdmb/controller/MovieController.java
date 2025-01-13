@@ -106,4 +106,9 @@ public class MovieController {
         }
         return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
     }
+    @GetMapping("similar/{tmdbId}")
+    public ResponseEntity<?> getSimilarMovies(@PathVariable Long tmdbId) {
+        return new ResponseEntity<>(movieService.getSimilar(tmdbId), HttpStatus.OK);
+    }
+
 }

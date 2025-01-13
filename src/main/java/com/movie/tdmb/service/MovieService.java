@@ -1,8 +1,6 @@
 package com.movie.tdmb.service;
 
-import com.movie.tdmb.dto.DataPageResponse;
-import com.movie.tdmb.dto.DataPageResponseExpand;
-import com.movie.tdmb.dto.TrailerWithMovieInfo;
+import com.movie.tdmb.dto.*;
 import com.movie.tdmb.exception.MovieNotFoundException;
 import com.movie.tdmb.model.*;
 import com.movie.tdmb.repository.MovieRepository;
@@ -13,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -121,4 +122,34 @@ public class MovieService {
         Map<Long, Movie> movieMap = movies.stream().collect(Collectors.toMap(Movie::getTmdbId, movie -> movie));
         return movieIds.stream().map(movieMap::get).collect(Collectors.toList());
     }
+
+    public List<Movie> getSimilar(Long tmdbId) {
+        Movie movie = movieRepository.findByTmdbId(tmdbId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
+        StringBuilder query = new StringBuilder();
+        for(Genre genre: movie.getGenres())
+        {
+            query.append(genre.getName()).append(" ");
+        }
+        for(Keyword keyword: movie.getKeywords())
+        {
+            query.append(keyword.getName()).append(" ");
+        }
+        query.append(movie.getOverview());
+        float threshold = 0.25F;
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            String apiKey = System.getenv("GEMINI_API_KEY");
+            String url = String.format(
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=apiKey&collection_name=movies&query=%s&threshold=%.2f",
+                    URLEncoder.encode(query.toString(), StandardCharsets.UTF_8), threshold
+            );
+             SimilarResponse response = restTemplate.getForObject(url, SimilarResponse.class);
+             List<String> ids = response.getData().getResult();
+             List<Movie> movies = movieRepository.findMoviesByIds(ids);
+             return movies;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call external API");
+        }
+    }
+
 }

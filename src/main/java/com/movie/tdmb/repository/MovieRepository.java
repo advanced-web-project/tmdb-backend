@@ -55,4 +55,5 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
     })
     List<String> findFilteredMovieIds(List<String> ids, String releaseDateBegin, String releaseDateEnd, List<Integer> genres, List<String> categories, Double userScoreBegin, Double userScoreEnd);
     List<Movie> findMoviesByTmdbIdIn(List<Long> tmdbIds);
+    List<Movie> findMoviesByIdIn(List<String> ids);
 }
