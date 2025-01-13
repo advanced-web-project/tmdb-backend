@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface WatchListRepository extends MongoRepository<WatchList, String> {
     List<WatchList> findByUserId(String userId);
-    Optional<WatchList> findByMovieIdAndUserId(String movieId, String userId);
+    Optional<WatchList> findByTmdbIdAndUserId(Long tmdbId, String userId);
 }

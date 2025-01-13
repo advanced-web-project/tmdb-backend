@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class Rating {
     @Id
     private String id;
-    private String movieId;
+    private Long tmdbId;
     private String userId;
     private int score;
     private LocalDateTime ratedAt;

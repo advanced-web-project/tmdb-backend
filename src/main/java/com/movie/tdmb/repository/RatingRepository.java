@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface RatingRepository extends MongoRepository<Rating, String> {
     List<Rating> findByUserId(String userId);
-    Optional<Rating> findByMovieIdAndUserId(String movieId, String userId);
+    Optional<Rating> findByTmdbIdAndUserId(Long tmdbId, String userId);
     List<Rating> findByUserIdAndScore(String userId, int score);
 }

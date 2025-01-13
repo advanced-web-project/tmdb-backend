@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class WatchList {
     @Id
     private String id;
-    private String movieId;
+    private Long tmdbId;
     private String userId;
     private LocalDateTime addedAt;
 }

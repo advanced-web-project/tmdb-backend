@@ -94,7 +94,6 @@ public class MovieService {
         int skip = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
 
-
         List<TrailerWithMovieInfo> trailers = movieRepository.findLastTrailersByCategory(type, skip, limit);
 
         long totalTrailers = movieRepository.countByCategoriesContainingAndTrailersNotEmpty(type);

@@ -7,6 +7,7 @@ import lombok.Data;
 public class TrailerWithMovieInfo {
     private Trailer trailer;
     private Long tmdb_id;
+    private Long movie_id;
     private String title;
     private String poster_path;
 }

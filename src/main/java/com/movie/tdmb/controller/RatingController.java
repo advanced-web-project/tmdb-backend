@@ -36,7 +36,7 @@ public class RatingController {
     }
 
     @DeleteMapping("/{movieId}")
-    public ResponseEntity<Void> deleteRating(@PathVariable String movieId, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Void> deleteRating(@PathVariable Long movieId, @RequestHeader("Authorization") String token) {
         String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
         ratingService.deleteRating(movieId, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
