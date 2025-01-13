@@ -33,7 +33,7 @@ public class Movie {
     private Object production_companies;
     private Object production_countries;
     private String release_date;
-    private Integer revenue;
+    private Long revenue;
     private Integer runtime;
     private Object spoken_languages;
     private String status;
