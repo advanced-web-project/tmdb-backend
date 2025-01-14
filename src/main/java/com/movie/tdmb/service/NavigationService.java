@@ -12,7 +12,7 @@ public class NavigationService {
     public NavigationResponse callExternalRetrieverAPI(String query, Float threshold) {
         RestTemplate restTemplate = new RestTemplate();
         try {
-            String apiKey = System.getenv("GEMINI_API_KEY");
+            String apiKey  =  "AIzaSyCFzh50x77Vou-QCy9qgF_pKn8QJucL3KY";//System.getenv("GEMINI_API_KEY");
             String url = String.format(
                     "https://awd-llm.azurewebsites.net/navigate/?llm_api_key=%s&query=%s&threshold=%.2f",apiKey,
                     URLEncoder.encode(query, StandardCharsets.UTF_8), threshold

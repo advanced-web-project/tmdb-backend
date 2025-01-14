@@ -185,7 +185,7 @@ public class SearchService {
         RestTemplate restTemplate = new RestTemplate();
         try {
             String url = String.format(
-                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=AIzaSyCFzh50x77Vou-QCy9qgF_pKn8QJucL3KY&collection_name=movies&query=%s&threshold=%.2f",
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",
                     URLEncoder.encode(query, StandardCharsets.UTF_8), threshold
             );
 
