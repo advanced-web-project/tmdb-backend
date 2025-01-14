@@ -94,7 +94,7 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.addAllowedOrigin("*");
+        configuration.setAllowedOrigins(Arrays.asList("https://advanced-web-project.github.io/tmdb-frontend", "https://advanced-web-project.github.io","http://localhost:3000"));
         configuration.addAllowedHeader("*");
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
