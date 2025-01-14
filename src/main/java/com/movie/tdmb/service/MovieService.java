@@ -8,6 +8,8 @@ import com.movie.tdmb.repository.MovieTrendingDayRepository;
 import com.movie.tdmb.repository.MovieTrendingWeekRepository;
 import com.movie.tdmb.repository.UserHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,9 @@ public class MovieService {
     private final MovieTrendingDayRepository movieTrendingDayRepository;
     private final MovieTrendingWeekRepository movieTrendingWeekRepository;
     private final UserHistoryRepository userHistoryRepository;
+    @NonFinal
+    @Value("${api-key}")
+    protected String API_KEY;
     public Movie getMovieById(String id) {
         return movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
     }
@@ -138,9 +143,8 @@ public class MovieService {
         float threshold = 0.25F;
         RestTemplate restTemplate = new RestTemplate();
         try {
-            String apiKey = System.getenv("GEMINI_API_KEY");
             String url = String.format(
-                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",apiKey,
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",API_KEY,
                     URLEncoder.encode(query.toString(), StandardCharsets.UTF_8), threshold
             );
              SimilarResponse response = restTemplate.getForObject(url, SimilarResponse.class);
