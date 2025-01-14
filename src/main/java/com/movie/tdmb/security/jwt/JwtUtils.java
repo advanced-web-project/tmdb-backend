@@ -1,4 +1,5 @@
 package com.movie.tdmb.security.jwt;
+import com.movie.tdmb.model.User;
 import com.movie.tdmb.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -93,6 +94,16 @@ public class JwtUtils {
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(key(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+    public String generateTokenFromUser(User user) {
+        return Jwts.builder()
+                .setSubject((user.getUsername()))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .claim("passwordChangedAt", user.getPasswordChangedAt())
+                .claim("userID", user.getId())
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }

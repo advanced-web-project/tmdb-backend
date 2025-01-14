@@ -86,12 +86,7 @@ public class AuthService {
             user.setProfile(uploadedImage);
             userRepository.save(user);
         }
-        // Authenticate the user
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), "123456"));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        // Generate JWT and refresh token
-        String jwt = jwtUtils.generateJwtToken(authentication);
+        String jwt = jwtUtils.generateTokenFromUser(user);
         RefreshToken refreshToken = refreshTokenRepository.findByUserId(user.getId())
                 .filter(token -> token.getExpiryDate().isAfter(Instant.now()))
                 .orElseGet(() -> generateRefreshToken(user));
@@ -168,7 +163,7 @@ public class AuthService {
         }
         User user = userRepository.findById(token.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found with refresh token"));
-        return jwtUtils.generateTokenFromUsername(user.getUsername());
+        return jwtUtils.generateTokenFromUser(user);
     }
     public RefreshToken getRefreshTokenFromEmail(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
