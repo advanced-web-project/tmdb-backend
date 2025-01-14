@@ -4,7 +4,9 @@ import com.movie.tdmb.dto.SearchMovieResponseDTO;
 import com.movie.tdmb.exception.InvalidDataException;
 import com.movie.tdmb.model.*;
 import com.movie.tdmb.repository.*;
+import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,6 +38,9 @@ public class SearchService {
 
     @Autowired
     private PersonRepository personRepository;
+    @NonFinal
+    @Value("${api-key}")
+    protected String API_KEY;
 
     /**
      * Search for movies based on multiple criteria, such as query type, genres, categories, release date,
@@ -185,7 +190,7 @@ public class SearchService {
         RestTemplate restTemplate = new RestTemplate();
         try {
             String url = String.format(
-                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",API_KEY,
                     URLEncoder.encode(query, StandardCharsets.UTF_8), threshold
             );
 
