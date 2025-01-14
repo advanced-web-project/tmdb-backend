@@ -36,10 +36,10 @@ public class WatchListController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{movieId}")
-    public ResponseEntity<Void> removeWatchlist(@PathVariable String movieId, @RequestHeader("Authorization") String token) {
+    @DeleteMapping("/{tmdbId}")
+    public ResponseEntity<Void> removeWatchlist(@PathVariable Long tmdbId, @RequestHeader("Authorization") String token) {
         String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
-        watchListService.removeWatchlist(movieId, userId);
+        watchListService.removeWatchlist(tmdbId, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

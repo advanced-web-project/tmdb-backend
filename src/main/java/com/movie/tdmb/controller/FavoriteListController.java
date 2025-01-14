@@ -1,10 +1,8 @@
 package com.movie.tdmb.controller;
 
 import com.movie.tdmb.dto.RequestFavoriteListDTO;
-import com.movie.tdmb.dto.RequestWatchListDTO;
 import com.movie.tdmb.dto.ResponseFavoriteListDTO;
 import com.movie.tdmb.model.FavoriteList;
-import com.movie.tdmb.model.WatchList;
 import com.movie.tdmb.security.jwt.JwtUtils;
 import com.movie.tdmb.service.FavoriteListService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +35,10 @@ public class FavoriteListController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{movieId}")
-    public ResponseEntity<Void> removeFavoriteList(@PathVariable String movieId, @RequestHeader("Authorization") String token) {
+    @DeleteMapping("/{tmdbId}")
+    public ResponseEntity<Void> removeFavoriteList(@PathVariable Long tmdbId, @RequestHeader("Authorization") String token) {
         String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
-        favoriteListService.removeFavoritelist(movieId, userId);
+        favoriteListService.removeFavoritelist(tmdbId, userId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

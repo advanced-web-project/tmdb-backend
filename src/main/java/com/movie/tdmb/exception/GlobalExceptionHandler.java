@@ -47,6 +47,19 @@ public class GlobalExceptionHandler {
         logger.error("Runtime Exception: {}", ex.getMessage(), ex);
         return error;
     }
+
+    @ExceptionHandler({PersonNotFoundException.class, MovieNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorDto handleNotFoundException(HttpServletRequest request, Exception ex) {
+        ErrorDto error = new ErrorDto();
+        error.setTimestamp(new Date());
+        error.setPath(request.getServletPath());
+        error.setStatus(HttpStatus.NOT_FOUND.value());
+        error.addError(ex.getMessage());
+        logger.error("Runtime Exception: {}", ex.getMessage(), ex);
+        return error;
+    }
    /**
      * Handles general exceptions and returns an ErrorDTO.
      *

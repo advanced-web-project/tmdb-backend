@@ -1,6 +1,5 @@
 package com.movie.tdmb.model;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,19 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
-@Entity
-@Document(value = "rating")
 @Data
+@Document(collection = "user_history")
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Rating {
+public class UserHistory {
     @Id
     private String id;
-    private Long tmdbId;
     private String userId;
-    private int score;
-    private LocalDateTime ratedAt;
+    private Map<Long,Integer> movies;
 }

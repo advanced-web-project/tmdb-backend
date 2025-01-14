@@ -9,8 +9,8 @@ import lombok.*;
 @Data
 @Builder
 public class ResponseWatchListDTO {
-    @JsonProperty("movie_id")
-    private String movieId;
+    @JsonProperty("tmdb_id")
+    private Long tmdbId;
     @JsonProperty("title")
     private String title;
     @JsonProperty("poster_path")

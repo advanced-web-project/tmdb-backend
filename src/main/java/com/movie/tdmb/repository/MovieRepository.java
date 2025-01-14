@@ -39,4 +39,21 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
     @Query("{ 'title': { $regex: ?0, $options: 'i' } }")
     List<Movie> findByTitleContaining(String query);
     Optional<Movie> findByTmdbId(Long tmdbId);
+    @Aggregation(pipeline = {
+            "{ $match: { '_id': { $in: ?0 } } }",
+            "{ $match: { $expr: { $and: [ " +
+                    "{ $cond: [ { $ne: [?1, null] }, { $gte: ['$release_date', ?1] }, true ] }, " +
+                    "{ $cond: [ { $ne: [?2, null] }, { $lte: ['$release_date', ?2] }, true ] } " +
+                    "] } } }",
+            "{ $match: { $expr: { $cond: [ { $ne: [?3, []] }, { $allElementsTrue: { $map: { input: ?3, as: 'genre', in: { $in: ['$$genre', '$genres.id'] } } } }, true ] } } }",
+            "{ $match: { $expr: { $cond: [ { $ne: [?4, []] }, { $allElementsTrue: { $map: { input: ?4, as: 'category', in: { $in: ['$$category', '$categories'] } } } }, true ] } } }",
+            "{ $match: { $expr: { $and: [ " +
+                    "{ $cond: [ { $ne: [?5, null] }, { $gte: ['$vote_average', ?5] }, true ] }, " +
+                    "{ $cond: [ { $ne: [?6, null] }, { $lte: ['$vote_average', ?6] }, true ] } " +
+                    "] } } }",
+            "{ $project: { _id: 1 } }"
+    })
+    List<String> findFilteredMovieIds(List<String> ids, String releaseDateBegin, String releaseDateEnd, List<Integer> genres, List<String> categories, Double userScoreBegin, Double userScoreEnd);
+    List<Movie> findMoviesByTmdbIdIn(List<Long> tmdbIds);
+    List<Movie> findMoviesByIdIn(List<String> ids);
 }

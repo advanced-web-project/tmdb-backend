@@ -1,24 +1,22 @@
 package com.movie.tdmb.service;
 
-import com.movie.tdmb.dto.DataPageResponse;
-import com.movie.tdmb.dto.DataPageResponseExpand;
-import com.movie.tdmb.dto.TrailerWithMovieInfo;
+import com.movie.tdmb.dto.*;
 import com.movie.tdmb.exception.MovieNotFoundException;
-import com.movie.tdmb.model.Movie;
-import com.movie.tdmb.model.MovieTrendingDay;
-import com.movie.tdmb.model.MovieTrendingWeek;
-import com.movie.tdmb.model.Trailer;
+import com.movie.tdmb.model.*;
 import com.movie.tdmb.repository.MovieRepository;
 import com.movie.tdmb.repository.MovieTrendingDayRepository;
 import com.movie.tdmb.repository.MovieTrendingWeekRepository;
+import com.movie.tdmb.repository.UserHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +25,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final MovieTrendingDayRepository movieTrendingDayRepository;
     private final MovieTrendingWeekRepository movieTrendingWeekRepository;
+    private final UserHistoryRepository userHistoryRepository;
     public Movie getMovieById(String id) {
         return movieRepository.findById(id).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
     }
@@ -94,7 +93,6 @@ public class MovieService {
         int skip = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
 
-
         List<TrailerWithMovieInfo> trailers = movieRepository.findLastTrailersByCategory(type, skip, limit);
 
         long totalTrailers = movieRepository.countByCategoriesContainingAndTrailersNotEmpty(type);
@@ -106,6 +104,52 @@ public class MovieService {
                 .totalPages((int) Math.ceil((double) totalTrailers / limit))
                 .data(trailers)
                 .build();
+    }
+    public void addMovieToUserHistory(String userId, Long tmdbId) {
+        UserHistory userHistory = userHistoryRepository.findByUserId(userId)
+                .orElse(UserHistory.builder().userId(userId).movies(new HashMap<Long, Integer>()).build());
+        userHistory.getMovies().put(tmdbId, userHistory.getMovies().getOrDefault(tmdbId, 0) + 1);
+        userHistoryRepository.save(userHistory);
+    }
+
+    public List<Movie> getRecommendationMovies(String userId) {
+        Optional<UserHistory> userHistory = userHistoryRepository.findByUserId(userId);
+        List<Long> movieIds = userHistory.get().getMovies().entrySet().stream()
+                .sorted(Comparator.comparingInt(e -> -e.getValue()))
+                .map(e -> e.getKey())
+                .collect(Collectors.toList());
+        List<Movie> movies = movieRepository.findMoviesByTmdbIdIn(movieIds);
+        Map<Long, Movie> movieMap = movies.stream().collect(Collectors.toMap(Movie::getTmdbId, movie -> movie));
+        return movieIds.stream().map(movieMap::get).collect(Collectors.toList());
+    }
+
+    public List<Movie> getSimilar(Long tmdbId) {
+        Movie movie = movieRepository.findByTmdbId(tmdbId).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
+        StringBuilder query = new StringBuilder();
+        for(Genre genre: movie.getGenres())
+        {
+            query.append(genre.getName()).append(" ");
+        }
+        for(Keyword keyword: movie.getKeywords())
+        {
+            query.append(keyword.getName()).append(" ");
+        }
+        query.append(movie.getOverview());
+        float threshold = 0.25F;
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            String apiKey = System.getenv("GEMINI_API_KEY");
+            String url = String.format(
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=apiKey&collection_name=movies&query=%s&threshold=%.2f",
+                    URLEncoder.encode(query.toString(), StandardCharsets.UTF_8), threshold
+            );
+             SimilarResponse response = restTemplate.getForObject(url, SimilarResponse.class);
+             List<String> ids = response.getData().getResult();
+             List<Movie> movies = movieRepository.findMoviesByIds(ids);
+             return movies;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call external API");
+        }
     }
 
 }

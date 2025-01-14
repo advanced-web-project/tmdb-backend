@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class RequestRatingDTO {
     @NotBlank(message = "Movie Id is mandatory")
-    @JsonProperty("movie_id")
-    private String movieId;
+    @JsonProperty("tmdb_id")
+    private Long tmdbId;
 
     @NotNull(message = "score is mandatory")
     @JsonProperty("score")

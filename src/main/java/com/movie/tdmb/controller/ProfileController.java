@@ -1,6 +1,7 @@
 package com.movie.tdmb.controller;
 
 import com.movie.tdmb.dto.ResponseProfileDTO;
+import com.movie.tdmb.model.User;
 import com.movie.tdmb.security.jwt.JwtUtils;
 import com.movie.tdmb.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +25,12 @@ public class ProfileController {
         String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
         ResponseProfileDTO response = profileService.getProfileByUserId(userId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<User> getUserByAuthorization(@RequestHeader("Authorization") String token) {
+        String userId = jwtUtils.getIdFromJwtToken(token.substring(7));
+        User user = profileService.getUserByUserId(userId);
+        return ResponseEntity.ok(user);
     }
 }

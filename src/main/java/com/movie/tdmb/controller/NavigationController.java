@@ -22,4 +22,6 @@ public class NavigationController {
         NavigationResponse navigationResponse = navigationService.callExternalRetrieverAPI(query, threshold);
         return ResponseEntity.ok(navigationResponse.getData());
     }
+
+
 }

@@ -8,6 +8,7 @@ import com.movie.tdmb.exception.UserNotFoundException;
 import com.movie.tdmb.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.movie.tdmb.model.User;
 
 import java.util.List;
 
@@ -43,5 +44,10 @@ public class ProfileService {
                 .favoriteList(favoriteList)
                 .ratings(ratings)
                 .build();
+    }
+
+    public User getUserByUserId(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 }

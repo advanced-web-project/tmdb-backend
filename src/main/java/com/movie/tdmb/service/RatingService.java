@@ -29,18 +29,18 @@ public class RatingService {
     private UserRepository userRepository;
 
     @Autowired
-    private MovieRepository movieRepository;
+    private MovieService movieService;
 
     public Rating addRating(RequestRatingDTO request, String userId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        movieRepository.findById(request.getMovieId()).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
-        boolean exists = ratingRepository.findByMovieIdAndUserId(request.getMovieId(), userId).isPresent();
+        movieService.getMovieByTmdbId(request.getTmdbId());
+        boolean exists = ratingRepository.findByTmdbIdAndUserId(request.getTmdbId(), userId).isPresent();
         if (exists) {
             throw new DuplicateRatingException(
-                    String.format("Rating for movie with ID %s already exists for user %s", request.getMovieId(), userId));
+                    String.format("Rating for movie with ID %s already exists for user %s", request.getTmdbId(), userId));
         }
         Rating rating = Rating.builder()
-                .movieId(request.getMovieId())
+                .tmdbId(request.getTmdbId())
                 .userId(userId)
                 .score(request.getScore())
                 .ratedAt(LocalDateTime.now())
@@ -49,14 +49,14 @@ public class RatingService {
         return savingRating;
     }
 
-    public void deleteRating(String movieId, String userId) {
-        Rating rating = ratingRepository.findByMovieIdAndUserId(movieId, userId)
+    public void deleteRating(Long tmdbId, String userId) {
+        Rating rating = ratingRepository.findByTmdbIdAndUserId(tmdbId, userId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found"));
         ratingRepository.delete(rating);
     }
 
     public void updateRating(RequestRatingDTO request, String userId) {
-        Rating rating = ratingRepository.findByMovieIdAndUserId(request.getMovieId(), userId)
+        Rating rating = ratingRepository.findByTmdbIdAndUserId(request.getTmdbId(), userId)
                 .orElseThrow(() -> new RatingNotFoundException("Rating not found"));
         rating.setScore(request.getScore());
         rating.setRatedAt(LocalDateTime.now());
@@ -71,10 +71,10 @@ public class RatingService {
 
         return ratings.stream()
                 .map(rating -> {
-                    Movie movie = movieRepository.findById(rating.getMovieId()).orElse(null);
+                    Movie movie = movieService.getMovieByTmdbId(rating.getTmdbId());
 
                     return ResponseRatingDTO.builder()
-                            .movieId(rating.getMovieId())
+                            .tmdbId(rating.getTmdbId())
                             .score(rating.getScore())
                             .ratedAt(rating.getRatedAt().toString())
                             .title(movie != null ? movie.getTitle() : null)

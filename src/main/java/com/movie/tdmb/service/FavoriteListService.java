@@ -24,18 +24,19 @@ public class FavoriteListService {
     private UserRepository userRepository;
 
     @Autowired
-    private MovieRepository movieRepository;
+    private MovieService movieService;
 
     public FavoriteList addFavoriteList(RequestFavoriteListDTO request, String userId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        movieRepository.findById(request.getMovieId()).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
-        boolean exists = favoriteListRepository.findByMovieIdAndUserId(request.getMovieId(), userId).isPresent();
+        //System.out.print("ID: "+ request.getTmdbId());
+        movieService.getMovieByTmdbId(request.getTmdbId());
+        boolean exists = favoriteListRepository.findByTmdbIdAndUserId(request.getTmdbId(), userId).isPresent();
         if (exists) {
             throw new DuplicateWatchListException(
-                    String.format("Movie with ID %s is already in the favorite list for user %s", request.getMovieId(), userId));
+                    String.format("Movie with ID %s is already in the favorite list for user %s", request.getTmdbId(), userId));
         }
         FavoriteList favoriteList = FavoriteList.builder()
-                .movieId(request.getMovieId())
+                .tmdbId(request.getTmdbId())
                 .userId(userId)
                 .addedAt(LocalDateTime.now())
                 .build();
@@ -51,10 +52,11 @@ public class FavoriteListService {
 
         return favoriteLists.stream()
                 .map(favoriteList -> {
-                    Movie movie = movieRepository.findById(favoriteList.getMovieId()).orElse(null);
+                    System.out.println("ID: "+ favoriteList.getTmdbId());
+                    Movie movie = movieService.getMovieByTmdbId(favoriteList.getTmdbId());
 
                     return ResponseFavoriteListDTO.builder()
-                            .movieId(favoriteList.getMovieId())
+                            .tmdbId(favoriteList.getTmdbId())
                             .addedAt(favoriteList.getAddedAt().toString())
                             .title(movie != null ? movie.getTitle() : null)
                             .posterPath(movie != null ? movie.getPoster_path() : null)
@@ -66,8 +68,8 @@ public class FavoriteListService {
                 .collect(Collectors.toList());
     }
 
-    public void removeFavoritelist(String movieId, String userId) {
-        FavoriteList favoriteList = favoriteListRepository.findByMovieIdAndUserId(movieId, userId)
+    public void removeFavoritelist(Long tmdbId, String userId) {
+        FavoriteList favoriteList = favoriteListRepository.findByTmdbIdAndUserId(tmdbId, userId)
                 .orElseThrow(() -> new FavoriteListNotFoundException("Favoritelist not found"));
         favoriteListRepository.delete(favoriteList);
     }

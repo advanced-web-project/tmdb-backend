@@ -27,18 +27,18 @@ public class WatchListService {
     private UserRepository userRepository;
 
     @Autowired
-    private MovieRepository movieRepository;
+    private MovieService movieService;
 
     public WatchList addWatchlist(RequestWatchListDTO request, String userId) {
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
-        movieRepository.findById(request.getMovieId()).orElseThrow(() -> new MovieNotFoundException("Movie not found"));
-        boolean exists = watchListRepository.findByMovieIdAndUserId(request.getMovieId(), userId).isPresent();
+        movieService.getMovieByTmdbId(request.getTmdbId());
+        boolean exists = watchListRepository.findByTmdbIdAndUserId(request.getTmdbId(), userId).isPresent();
         if (exists) {
             throw new DuplicateWatchListException(
-                    String.format("Movie with ID %s is already in the watchlist for user %s", request.getMovieId(), userId));
+                    String.format("Movie with ID %s is already in the watchlist for user %s", request.getTmdbId(), userId));
         }
         WatchList watchlist = WatchList.builder()
-                .movieId(request.getMovieId())
+                .tmdbId(request.getTmdbId())
                 .userId(userId)
                 .addedAt(LocalDateTime.now())
                 .build();
@@ -54,10 +54,10 @@ public class WatchListService {
 
         return watchlists.stream()
                 .map(watchlist -> {
-                    Movie movie = movieRepository.findById(watchlist.getMovieId()).orElse(null);
+                    Movie movie = movieService.getMovieByTmdbId(watchlist.getTmdbId());
 
                     return ResponseWatchListDTO.builder()
-                            .movieId(watchlist.getMovieId())
+                            .tmdbId(watchlist.getTmdbId())
                             .addedAt(watchlist.getAddedAt().toString())
                             .title(movie != null ? movie.getTitle() : null)
                             .posterPath(movie != null ? movie.getPoster_path() : null)
@@ -69,8 +69,8 @@ public class WatchListService {
                 .collect(Collectors.toList());
     }
 
-    public void removeWatchlist(String movieId, String userId) {
-        WatchList watchlist = watchListRepository.findByMovieIdAndUserId(movieId, userId)
+    public void removeWatchlist(Long tmdbId, String userId) {
+        WatchList watchlist = watchListRepository.findByTmdbIdAndUserId(tmdbId, userId)
                 .orElseThrow(() -> new WatchListNotFoundException("Watchlist not found"));
         watchListRepository.delete(watchlist);
     }

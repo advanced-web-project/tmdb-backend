@@ -9,6 +9,6 @@ import lombok.*;
 @Data
 public class RequestWatchListDTO {
     @NotBlank(message = "Movie Id is mandatory")
-    @JsonProperty("movie_id")
-    private String movieId;
+    @JsonProperty("tmdb_id")
+    private Long tmdbId;
 }
