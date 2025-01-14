@@ -19,7 +19,7 @@ public class Movie {
     private Object belongs_to_collection;
     private Integer budget;
     private Object categories;
-    private Object genres;
+    private List<Genre> genres;
     private String homepage;
     private String imdb_id;
     @Field("tmdb_id")
