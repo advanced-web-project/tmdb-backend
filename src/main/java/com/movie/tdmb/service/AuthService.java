@@ -72,9 +72,11 @@ public class AuthService {
             // Create a new user if they don't exist
             return userRepository.save(User.builder()
                     .email(email)
-                    .username(userResponse.getName())
-                    .password("123456") // Default password
+                    .username(email)
+                    .password(passwordEncoder.encode("123456"))
                     .isActive(true)
+                    .createdAt(new Date())
+                    .passwordChangedAt(new Date())
                     .profile(cloudinaryUtil.uploadImageToCloudinary(imageUrl))
                     .build());
         });
@@ -86,7 +88,7 @@ public class AuthService {
         }
         // Authenticate the user
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+                new UsernamePasswordAuthenticationToken(user.getUsername(), "123456"));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         // Generate JWT and refresh token
         String jwt = jwtUtils.generateJwtToken(authentication);
