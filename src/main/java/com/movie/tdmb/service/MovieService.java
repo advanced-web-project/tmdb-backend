@@ -140,7 +140,7 @@ public class MovieService {
         try {
             String apiKey = System.getenv("GEMINI_API_KEY");
             String url = String.format(
-                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=apiKey&collection_name=movies&query=%s&threshold=%.2f",
+                    "https://awd-llm.azurewebsites.net/retriever/?llm_api_key=%s&collection_name=movies&query=%s&threshold=%.2f",apiKey,
                     URLEncoder.encode(query.toString(), StandardCharsets.UTF_8), threshold
             );
              SimilarResponse response = restTemplate.getForObject(url, SimilarResponse.class);

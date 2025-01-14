@@ -129,6 +129,7 @@ public class AuthService {
             return SignInResponseDto.builder()
                     .accessToken(jwt)
                     .refreshToken(refreshToken.getToken())
+                    .user(user)
                     .build();
     }
     public void sendOTP(String email)

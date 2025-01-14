@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class ResponseRatingDTO {
-    @JsonProperty("movie_id")
+    @JsonProperty("tmdb_id")
     private Long tmdbId;
     @JsonProperty("title")
     private String title;
