@@ -112,11 +112,11 @@ docker push <your-dockerhub-username>/tmdb-back-end:1.0
   * Build and test the application
   * Push Docker image tagged ```dev``` to Docker Hub
 ### Main Branch
-* Defined in docker-ci-cd-main.yaml
+* Defined in ```docker-ci-cd-main.yaml```
 * Triggers:
   * Push to `main` branch
   * Pull requests targeting ```main```
-*Actions:
+* Actions:
   * Build and test the application
   * Push Docker image tagged production to Docker Hub
   * Deploy to Azure Web App
