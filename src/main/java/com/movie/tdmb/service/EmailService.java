@@ -1,6 +1,7 @@
 package com.movie.tdmb.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import java.security.SecureRandom;
 public class EmailService {
     private final JavaMailSender mailSender;
     private static final int OTP_LENGTH = 6;
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     public String generateOtp() {
         SecureRandom random = new SecureRandom();
@@ -27,6 +30,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Your OTP Code");
         message.setText("Your OTP code is: " + otp + "\nThis code will expire in 5 minutes.");
+        message.setFrom(fromEmail);
         mailSender.send(message);
     }
 }
